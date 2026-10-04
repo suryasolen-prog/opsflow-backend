@@ -1,0 +1,44 @@
+# OpsFlow Backend
+
+Release: 1.0
+
+Contents:
+
+* OpsFlow-Final.zip
+* opsflow-backend-0.0.1-SNAPSHOT.jar
+* README.md
+* .env.example
+
+Technology:
+
+* Java 21
+* Spring Boot 4.1.1
+* PostgreSQL
+* Spring Security
+* JWT
+* JPA/Hibernate
+* Swagger/OpenAPI
+
+Implementation:
+
+* Authentication
+* JWT authorization
+* Role-based access control
+* User management
+* Project management
+* Project member management
+* Task management
+* Validation
+* Global exception handling
+* Swagger/OpenAPI documentation
+
+Automated tests:
+52 tests passed
+0 failures
+0 errors
+
+Build:
+Maven package completed successfully.
+
+Credentials:
+No real database password or JWT secret is included in this release.

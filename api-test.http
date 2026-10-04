@@ -1,0 +1,355 @@
+### Get all users
+GET http://localhost:8080/api/users
+
+
+### Create test user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "BCrypt Test User",
+  "email": "bcrypttest2@opsflow.com",
+  "password": "TestPassword123!",
+  "role": "DEVELOPER"
+}
+
+### Login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bcrypttest2@opsflow.com",
+  "password": "TestPassword123!"
+}
+
+### Get users with JWT
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJiY3J5cHR0ZXN0MkBvcHNmbG93LmNvbSIsImlhdCI6MTc4Nzc0NzQ0NywiZXhwIjoxNzg3ODMzODQ3fQ.vADAc9H1VGCcfez8lgQSZHg0qUxB6mrlAB4hYYq9tbVSX_eGmN5WDWXyLKCVotGd
+
+### Get users without JWT
+GET http://localhost:8080/api/users
+
+### Get user by ID
+GET http://localhost:8080/api/users/20
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJiY3J5cHR0ZXN0MkBvcHNmbG93LmNvbSIsImlhdCI6MTc4Nzc2NDM0MiwiZXhwIjoxNzg3ODUwNzQyfQ.w_QuTi6s08HMObb-qr2LJxvhw5UbNwsv0JhUssB91R-HH7mK7oucH8rP5QXtZzgF
+
+### Get non-existing user
+GET http://localhost:8080/api/users/9999
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJiY3J5cHR0ZXN0MkBvcHNmbG93LmNvbSIsImlhdCI6MTc4Nzc2NDM0MiwiZXhwIjoxNzg3ODUwNzQyfQ.w_QuTi6s08HMObb-qr2LJxvhw5UbNwsv0JhUssB91R-HH7mK7oucH8rP5QXtZzgF
+
+### Get user by email
+GET http://localhost:8080/api/users/email/bcrypttest2@opsflow.com
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJiY3J5cHR0ZXN0MkBvcHNmbG93LmNvbSIsImlhdCI6MTc4Nzc2NDM0MiwiZXhwIjoxNzg3ODUwNzQyfQ.w_QuTi6s08HMObb-qr2LJxvhw5UbNwsv0JhUssB91R-HH7mK7oucH8rP5QXtZzgF
+
+### Delete user 20
+DELETE http://localhost:8080/api/users/20
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJiY3J5cHR0ZXN0MkBvcHNmbG93LmNvbSIsImlhdCI6MTc4Nzc2NDM0MiwiZXhwIjoxNzg3ODUwNzQyfQ.w_QuTi6s08HMObb-qr2LJxvhw5UbNwsv0JhUssB91R-HH7mK7oucH8rP5QXtZzgF
+
+### Verify user 20 is deleted
+GET http://localhost:8080/api/users/20
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJiY3J5cHR0ZXN0MkBvcHNmbG93LmNvbSIsImlhdCI6MTc4Nzc2NDM0MiwiZXhwIjoxNzg3ODUwNzQyfQ.w_QuTi6s08HMObb-qr2LJxvhw5UbNwsv0JhUssB91R-HH7mK7oucH8rP5QXtZzgF
+
+### Delete without JWT
+DELETE http://localhost:8080/api/users/18
+
+### Create fresh RBAC test user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "RBAC Developer",
+  "email": "rbacdeveloper@opsflow.com",
+  "password": "TestPassword123!",
+  "role": "DEVELOPER"
+}
+
+### Login RBAC developer
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacdeveloper@opsflow.com",
+  "password": "TestPassword123!"
+}
+
+### Get users with fresh JWT
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg3ODQ5Mjg3LCJleHAiOjE3ODc5MzU2ODd9.nVamKag9adQu9mvhzeGCKoDj7XUI-hz9r-c69XFtKqvFniHrIJDPwGHDZzlR5ySH
+
+### ADMIN endpoint with DEVELOPER JWT
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg3ODQ5Mjg3LCJleHAiOjE3ODc5MzU2ODd9.nVamKag9adQu9mvhzeGCKoDj7XUI-hz9r-c69XFtKqvFniHrIJDPwGHDZzlR5ySH
+
+### Create ADMIN user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "RBAC Admin",
+  "email": "rbacadmin@opsflow.com",
+  "password": "AdminPassword123!",
+  "role": "ADMIN"
+}
+
+### Login as Admin
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!"
+}
+
+
+### ADMIN endpoint with ADMIN JWT
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW5Ab3BzZmxvdy5jb20iLCJpYXQiOjE3ODc4NDk3ODMsImV4cCI6MTc4NzkzNjE4M30.-0idHK98npcs2BH2GrLDTmhpPShwGw1D3n0OE7sycHdXWCibN5zrQL79xJXiaXcn
+
+### Create disposable user
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "Delete RBAC Test",
+  "email": "deleterbactest@opsflow.com",
+  "password": "TestPassword123!",
+  "role": "DEVELOPER"
+}
+
+### Developer tries to delete user
+DELETE http://localhost:8080/api/users/22
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg3ODQ5Mjg3LCJleHAiOjE3ODc5MzU2ODd9.nVamKag9adQu9mvhzeGCKoDj7XUI-hz9r-c69XFtKqvFniHrIJDPwGHDZzlR5ySH
+
+### Verify deletion
+GET http://localhost:8080/api/users/22
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg3OTE3NDA4LCJleHAiOjE3ODgwMDM4MDh9.Ky4KxUrP9KEHmofB7z6nM5OVy8kTKEuvSrNa0XTE14VZnL_ur_EbYCliZKbkBD7J
+
+### Check deleted user with ADMIN
+GET http://localhost:8080/api/users/22
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg3OTE3NDA4LCJleHAiOjE3ODgwMDM4MDh9.Ky4KxUrP9KEHmofB7z6nM5OVy8kTKEuvSrNa0XTE14VZnL_ur_EbYCliZKbkBD7J
+
+### Create Admin User
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+  "name": "RBAC Admin",
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!",
+  "role": "DEVELOPER"
+}
+
+### Test Admin Access
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg3OTM3OTM5LCJleHAiOjE3ODgwMjQzMzl9.iYPBQHoSgBCMf1bzdaNs6DfUTRDXiBjq6q46mrGYt9JTAdLOXcZ4EyCXmDzBDyYJ
+
+### Developer trying ADMIN endpoint
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg3ODQ5Mjg3LCJleHAiOjE3ODc5MzU2ODd9.nVamKag9adQu9mvhzeGCKoDj7XUI-hz9r-c69XFtKqvFniHrIJDPwGHDZzlR5ySH
+
+### ADMIN TEST
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MDk5NzM0LCJleHAiOjE3ODgxODYxMzR9.pnhkYy4U_ahLumNPIoHZP-3bRclg8WWF-X5gRpFQTLEyc4YZ5Bdx-y0wdqwVjMrz
+
+### CREATE USER AS ADMIN
+POST http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MDk5NzM0LCJleHAiOjE3ODgxODYxMzR9.pnhkYy4U_ahLumNPIoHZP-3bRclg8WWF-X5gRpFQTLEyc4YZ5Bdx-y0wdqwVjMrz
+Content-Type: application/json
+
+{
+  "name": "Delete RBAC Test 2",
+  "email": "deleterbactest2@opsflow.com",
+  "password": "TestPassword123!",
+  "role": "DEVELOPER"
+}
+
+### Get newly created user
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MDk5NzM0LCJleHAiOjE3ODgxODYxMzR9.pnhkYy4U_ahLumNPIoHZP-3bRclg8WWF-X5gRpFQTLEyc4YZ5Bdx-y0wdqwVjMrz
+
+### Get user by email
+GET http://localhost:8080/api/users/email/deleterbactest2@opsflow.com
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MDk5NzM0LCJleHAiOjE3ODgxODYxMzR9.pnhkYy4U_ahLumNPIoHZP-3bRclg8WWF-X5gRpFQTLEyc4YZ5Bdx-y0wdqwVjMrz
+
+### Login as Developer
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacdeveloper@opsflow.com",
+  "password": "TestPassword123!"
+}
+
+### Developer tries ADMIN endpoint
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MTAwMjQzLCJleHAiOjE3ODgxODY2NDN9.XZTjojtC9aVXz6r9PhHx34mcBNPq2k01mWyEdJEPTQuEBlO6BAn2yfALzvUCFoiA
+
+### Developer tries GET user
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MTAwMjQzLCJleHAiOjE3ODgxODY2NDN9.XZTjojtC9aVXz6r9PhHx34mcBNPq2k01mWyEdJEPTQuEBlO6BAn2yfALzvUCFoiA
+
+### Admin gets user 30
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MDk5NzM0LCJleHAiOjE3ODgxODYxMzR9.pnhkYy4U_ahLumNPIoHZP-3bRclg8WWF-X5gRpFQTLEyc4YZ5Bdx-y0wdqwVjMrz
+
+### Admin deletes user 30
+DELETE http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MDk5NzM0LCJleHAiOjE3ODgxODYxMzR9.pnhkYy4U_ahLumNPIoHZP-3bRclg8WWF-X5gRpFQTLEyc4YZ5Bdx-y0wdqwVjMrz
+
+### ADMIN LOGIN
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "TestPassword123!"
+}
+
+### Developer access
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MTg5Nzg3LCJleHAiOjE3ODgyNzYxODd9.TV_-HnClctFm48OLOkfwSDTqit3kGpgNdWCNdXj9S8oRLpPSSvVJpePZxxKjnATJ
+
+### ADMIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!"
+}
+
+### ADMIN LOGIN
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!"
+}
+
+### ADMIN TEST
+
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjMzNjQ0LCJleHAiOjE3ODgzMjAwNDR9.WCF_jG0xpfDuXUvugEHYWSC52PfUEAtP7eBodYC_xHBamo_X7jWXCb1jYfvjhZ-x
+
+### ADMIN LOGIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!"
+}
+
+### ADMIN TEST
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjMzODg1LCJleHAiOjE3ODgzMjAyODV9.vDyR-rkvfrX3dvksWHSGPNt4PCL2EVjbi8paDqtYIupOepnILfMoe_CbnMBcW6mY
+
+### ADMIN GET USER 30
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjMzODg1LCJleHAiOjE3ODgzMjAyODV9.vDyR-rkvfrX3dvksWHSGPNt4PCL2EVjbi8paDqtYIupOepnILfMoe_CbnMBcW6mY
+
+### ADMIN DELETE USER 30
+DELETE http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjMzODg1LCJleHAiOjE3ODgzMjAyODV9.vDyR-rkvfrX3dvksWHSGPNt4PCL2EVjbi8paDqtYIupOepnILfMoe_CbnMBcW6mY
+
+### VERIFY DELETE
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjMzODg1LCJleHAiOjE3ODgzMjAyODV9.vDyR-rkvfrX3dvksWHSGPNt4PCL2EVjbi8paDqtYIupOepnILfMoe_CbnMBcW6mY
+
+### DEVELOPER LOGIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacdeveloper@opsflow.com",
+  "password": "TestPassword123!"
+}
+
+### DEVELOPER -> ADMIN ENDPOINT
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjM0MjI0LCJleHAiOjE3ODgzMjA2MjR9.maN3x2_0i09e9VGq183bJNtct-CC_xHDZGZFp9KbdoUf1ezqD4ZOlFNi_pFX0yTr
+
+### DEVELOPER DELETE
+DELETE http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjM0MjI0LCJleHAiOjE3ODgzMjA2MjR9.maN3x2_0i09e9VGq183bJNtct-CC_xHDZGZFp9KbdoUf1ezqD4ZOlFNi_pFX0yTr
+
+
+###ADMIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!"
+}
+
+
+###
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0NTMzLCJleHAiOjE3ODgzNTA5MzN9.C_pJNcUCpGk_vD1hYlKKE0RqbOcczJNmRRqkQQL6JiO-t7OVc1GW0h-BsLZieq7d
+
+### ADMIN GET USER 30
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0NTMzLCJleHAiOjE3ODgzNTA5MzN9.C_pJNcUCpGk_vD1hYlKKE0RqbOcczJNmRRqkQQL6JiO-t7OVc1GW0h-BsLZieq7d
+
+### ADMIN DELETE USER 30
+DELETE http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0NTMzLCJleHAiOjE3ODgzNTA5MzN9.C_pJNcUCpGk_vD1hYlKKE0RqbOcczJNmRRqkQQL6JiO-t7OVc1GW0h-BsLZieq7d
+
+### VERIFY DELETE
+GET http://localhost:8080/api/users/30
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0NTMzLCJleHAiOjE3ODgzNTA5MzN9.C_pJNcUCpGk_vD1hYlKKE0RqbOcczJNmRRqkQQL6JiO-t7OVc1GW0h-BsLZieq7d
+
+### DEVELOPER LOGIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacdeveloper@opsflow.com",
+  "password": "TestPassword123!"
+}
+
+###DELETE
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjZGV2ZWxvcGVyQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0NzM4LCJleHAiOjE3ODgzNTExMzh9.1F8AcNC80VKQyXd-HvUFLt4AbHv-UoFGgaflsgh-NMQJs3f9sTo1eGQeMMtwc0lT
+
+### FRESH ADMIN LOGIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!"
+}
+
+### FRESH ADMIN TEST
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0OTU1LCJleHAiOjE3ODgzNTEzNTV9.sak-4oetcUpnvCVqPlzQ2Thu7FfDsmxTydTExdGnwtxA_zIXounQZO8krSOVP61B
+
+### ADMIN GET ALL USERS
+GET http://localhost:8080/api/users
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0OTU1LCJleHAiOjE3ODgzNTEzNTV9.sak-4oetcUpnvCVqPlzQ2Thu7FfDsmxTydTExdGnwtxA_zIXounQZO8krSOVP61B
+
+### CREATE TEST DEVELOPER
+POST http://localhost:8080/api/users
+Authorization: Bearer  eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0OTU1LCJleHAiOjE3ODgzNTEzNTV9.sak-4oetcUpnvCVqPlzQ2Thu7FfDsmxTydTExdGnwtxA_zIXounQZO8krSOVP61B
+Content-Type: application/json
+
+{
+  "name": "Delete Test User",
+  "email": "deletetest@opsflow.com",
+  "password": "TestPassword123!",
+  "role": "DEVELOPER"
+}
+
+### ADMIN DELETE USER
+DELETE http://localhost:8080/api/users/31
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0OTU1LCJleHAiOjE3ODgzNTEzNTV9.sak-4oetcUpnvCVqPlzQ2Thu7FfDsmxTydTExdGnwtxA_zIXounQZO8krSOVP61B
+
+### VERIFY DELETED USER
+GET http://localhost:8080/api/users/31
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJyYmFjYWRtaW4yQG9wc2Zsb3cuY29tIiwiaWF0IjoxNzg4MjY0OTU1LCJleHAiOjE3ODgzNTEzNTV9.sak-4oetcUpnvCVqPlzQ2Thu7FfDsmxTydTExdGnwtxA_zIXounQZO8krSOVP61B
+

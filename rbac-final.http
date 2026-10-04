@@ -1,0 +1,41 @@
+### ADMIN LOGIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacadmin2@opsflow.com",
+  "password": "AdminPassword123!"
+}
+
+> {%
+    client.global.set("adminToken", response.body.token);
+%}
+
+### ADMIN ACCESS
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer {{adminToken}}
+
+### ADMIN GET USERS
+GET http://localhost:8080/api/users
+Authorization: Bearer {{adminToken}}
+
+### DEVELOPER LOGIN
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "rbacdeveloper@opsflow.com",
+  "password": "TestPassword123!"
+}
+
+> {%
+    client.global.set("developerToken", response.body.token);
+%}
+
+### DEVELOPER DENIED ADMIN ACCESS
+GET http://localhost:8080/api/users/admin-test
+Authorization: Bearer {{developerToken}}
+
+### DEVELOPER DENIED GET USERS
+GET http://localhost:8080/api/users
+Authorization: Bearer {{developerToken}}
