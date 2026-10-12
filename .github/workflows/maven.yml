@@ -12,8 +12,7 @@ on:
 
 jobs:
   build-and-test:
-
-    runs-on: ubuntu-latest
+    name: build-and-test
 
     env:
       DB_USERNAME: postgres
