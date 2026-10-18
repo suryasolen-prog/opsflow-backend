@@ -63,7 +63,7 @@ public class ProjectMemberController {
             @PathVariable Long memberId) {
 
         boolean removed =
-                projectMemberService.removeMember(memberId);
+                projectMemberService.removeMember(projectId, memberId);
 
         if (!removed) {
             return ResponseEntity.notFound().build();
