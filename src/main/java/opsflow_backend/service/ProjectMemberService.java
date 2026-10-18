@@ -72,13 +72,17 @@ public class ProjectMemberService {
                 .findByProjectId(projectId);
     }
 
-    public boolean removeMember(Long memberId) {
+    public boolean removeMember(Long projectId, Long memberId) {
 
-        if (!projectMemberRepository.existsById(memberId)) {
+        Optional<ProjectMember> member =
+                projectMemberRepository.findById(memberId);
+
+        if (member.isEmpty()
+                || !member.get().getProject().getId().equals(projectId)) {
             return false;
         }
 
-        projectMemberRepository.deleteById(memberId);
+        projectMemberRepository.delete(member.get());
         return true;
     }
 }
