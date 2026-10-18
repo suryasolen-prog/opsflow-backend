@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -97,6 +98,53 @@ class ProjectMemberControllerTests {
                         .orElseThrow();
 
         projectMemberRepository.deleteById(member.getId());
+    }
+
+
+    @Test
+    void cannotDeleteMembershipThroughDifferentProjectUrl() throws Exception {
+
+        String adminToken =
+                jwtService.generateToken(ADMIN_EMAIL);
+
+        Project otherProject = new Project();
+        otherProject.setName("SEC-01 regression project");
+        otherProject = projectRepository.save(otherProject);
+        Long otherProjectId = otherProject.getId();
+
+        try {
+            String request = """
+                    {
+                        "userId": 99,
+                        "role": "TESTER"
+                    }
+                    """;
+
+            mockMvc.perform(
+                            post("/api/projects/" + otherProjectId + "/members")
+                                    .header("Authorization", "Bearer " + adminToken)
+                                    .contentType(APPLICATION_JSON)
+                                    .content(request)
+                    )
+                    .andExpect(status().isCreated());
+
+            ProjectMember member = projectMemberRepository
+                    .findByProjectIdAndUserId(otherProjectId, 99L)
+                    .orElseThrow();
+
+            mockMvc.perform(
+                            delete("/api/projects/1/members/" + member.getId())
+                                    .header("Authorization", "Bearer " + adminToken)
+                    )
+                    .andExpect(status().isNotFound());
+
+            assertTrue(projectMemberRepository.findById(member.getId()).isPresent(),
+                    "Membership must remain when the URL project ID does not match");
+        } finally {
+            projectMemberRepository.findByProjectIdAndUserId(otherProjectId, 99L)
+                    .ifPresent(projectMemberRepository::delete);
+            projectRepository.deleteById(otherProjectId);
+        }
     }
 
 
