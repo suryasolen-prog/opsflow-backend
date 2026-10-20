@@ -244,4 +244,43 @@ class ProjectMemberControllerTests {
                 )
                 .andExpect(status().isForbidden());
     }
+
+        @Test
+    void cannotDeleteMembershipThroughDifferentProjectUrl() throws Exception {
+
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
+
+        String request = """
+                {
+                    "userId": 99,
+                    "role": "TESTER"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/projects/1/members")
+                                .header("Authorization", "Bearer " + adminToken)
+                                .contentType(APPLICATION_JSON)
+                                .content(request)
+                )
+                .andExpect(status().isCreated());
+
+        ProjectMember member =
+                projectMemberRepository
+                        .findByProjectIdAndUserId(1L, 99L)
+                        .orElseThrow();
+
+        mockMvc.perform(
+                        delete("/api/projects/999999999/members/" + member.getId())
+                                .header("Authorization", "Bearer " + adminToken)
+                )
+                .andExpect(status().isNotFound());
+
+        org.junit.jupiter.api.Assertions.assertTrue(
+                projectMemberRepository.existsById(member.getId())
+        );
+
+        projectMemberRepository.deleteById(member.getId());
+    }
+
 }
