@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,38 +35,23 @@ class ProjectMemberControllerTests {
     @Autowired
     private ProjectMemberRepository projectMemberRepository;
 
-    private static final String ADMIN_EMAIL =
-            "rbacadmin2@opsflow.com";
-
-    private static final String DEVELOPER_EMAIL =
-            "rbacdeveloper@opsflow.com";
-
-    private static final String TESTER_EMAIL =
-            "rbactester@opsflow.com";
-
+    private static final String ADMIN_EMAIL = "rbacadmin2@opsflow.com";
+    private static final String DEVELOPER_EMAIL = "rbacdeveloper@opsflow.com";
+    private static final String TESTER_EMAIL = "rbactester@opsflow.com";
 
     @Test
     void adminCanGetProjectMembers() throws Exception {
-
-        String adminToken =
-                jwtService.generateToken(ADMIN_EMAIL);
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
 
         mockMvc.perform(
-                        get("/api/projects/1/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + adminToken
-                                )
-                )
-                .andExpect(status().isOk());
+                get("/api/projects/1/members")
+                        .header("Authorization", "Bearer " + adminToken)
+        ).andExpect(status().isOk());
     }
-
 
     @Test
     void adminCanAddProjectMember() throws Exception {
-
-        String adminToken =
-                jwtService.generateToken(ADMIN_EMAIL);
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
 
         String request = """
                 {
@@ -76,35 +62,70 @@ class ProjectMemberControllerTests {
 
         mockMvc.perform(
                         post("/api/projects/1/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + adminToken
-                                )
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(APPLICATION_JSON)
                                 .content(request)
                 )
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.projectId")
-                        .value(1))
-                .andExpect(jsonPath("$.userId")
-                        .value(99))
-                .andExpect(jsonPath("$.role")
-                        .value("TESTER"));
+                .andExpect(jsonPath("$.projectId").value(1))
+                .andExpect(jsonPath("$.userId").value(99))
+                .andExpect(jsonPath("$.role").value("TESTER"));
 
-        ProjectMember member =
-                projectMemberRepository
-                        .findByProjectIdAndUserId(1L, 99L)
-                        .orElseThrow();
+        ProjectMember member = projectMemberRepository
+                .findByProjectIdAndUserId(1L, 99L)
+                .orElseThrow();
 
         projectMemberRepository.deleteById(member.getId());
     }
 
+    @Test
+    void cannotDeleteMembershipThroughDifferentProjectUrl() throws Exception {
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
+
+        Project otherProject = new Project();
+        otherProject.setName("SEC-01 regression project");
+        otherProject = projectRepository.save(otherProject);
+        Long otherProjectId = otherProject.getId();
+
+        try {
+            String request = """
+                    {
+                        "userId": 99,
+                        "role": "TESTER"
+                    }
+                    """;
+
+            mockMvc.perform(
+                    post("/api/projects/" + otherProjectId + "/members")
+                            .header("Authorization", "Bearer " + adminToken)
+                            .contentType(APPLICATION_JSON)
+                            .content(request)
+            ).andExpect(status().isCreated());
+
+            ProjectMember member = projectMemberRepository
+                    .findByProjectIdAndUserId(otherProjectId, 99L)
+                    .orElseThrow();
+
+            mockMvc.perform(
+                    delete("/api/projects/1/members/" + member.getId())
+                            .header("Authorization", "Bearer " + adminToken)
+            ).andExpect(status().isNotFound());
+
+            assertTrue(
+                    projectMemberRepository.findById(member.getId()).isPresent(),
+                    "Membership must remain when the URL project ID does not match"
+            );
+        } finally {
+            projectMemberRepository.findByProjectIdAndUserId(otherProjectId, 99L)
+                    .ifPresent(projectMemberRepository::delete);
+
+            projectRepository.deleteById(otherProjectId);
+        }
+    }
 
     @Test
     void duplicateProjectMemberReturnsConflict() throws Exception {
-
-        String adminToken =
-                jwtService.generateToken(ADMIN_EMAIL);
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
 
         String request = """
                 {
@@ -115,10 +136,7 @@ class ProjectMemberControllerTests {
 
         mockMvc.perform(
                         post("/api/projects/1/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + adminToken
-                                )
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(APPLICATION_JSON)
                                 .content(request)
                 )
@@ -127,12 +145,9 @@ class ProjectMemberControllerTests {
                         .value("User is already a member of this project"));
     }
 
-
     @Test
     void missingUserIdReturnsBadRequest() throws Exception {
-
-        String adminToken =
-                jwtService.generateToken(ADMIN_EMAIL);
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
 
         String request = """
                 {
@@ -142,26 +157,18 @@ class ProjectMemberControllerTests {
 
         mockMvc.perform(
                         post("/api/projects/1/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + adminToken
-                                )
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(APPLICATION_JSON)
                                 .content(request)
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error")
-                        .value("Validation failed"))
-                .andExpect(jsonPath("$.fields.userId")
-                        .value("User ID is required"));
+                .andExpect(jsonPath("$.error").value("Validation failed"))
+                .andExpect(jsonPath("$.fields.userId").value("User ID is required"));
     }
-
 
     @Test
     void missingRoleReturnsBadRequest() throws Exception {
-
-        String adminToken =
-                jwtService.generateToken(ADMIN_EMAIL);
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
 
         String request = """
                 {
@@ -171,26 +178,18 @@ class ProjectMemberControllerTests {
 
         mockMvc.perform(
                         post("/api/projects/1/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + adminToken
-                                )
+                                .header("Authorization", "Bearer " + adminToken)
                                 .contentType(APPLICATION_JSON)
                                 .content(request)
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error")
-                        .value("Validation failed"))
-                .andExpect(jsonPath("$.fields.role")
-                        .value("Role is required"));
+                .andExpect(jsonPath("$.error").value("Validation failed"))
+                .andExpect(jsonPath("$.fields.role").value("Role is required"));
     }
-
 
     @Test
     void nonexistentProjectReturnsNotFound() throws Exception {
-
-        String adminToken =
-                jwtService.generateToken(ADMIN_EMAIL);
+        String adminToken = jwtService.generateToken(ADMIN_EMAIL);
 
         String request = """
                 {
@@ -200,48 +199,30 @@ class ProjectMemberControllerTests {
                 """;
 
         mockMvc.perform(
-                        post("/api/projects/999999999/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + adminToken
-                                )
-                                .contentType(APPLICATION_JSON)
-                                .content(request)
-                )
-                .andExpect(status().isNotFound());
+                post("/api/projects/999999999/members")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(APPLICATION_JSON)
+                        .content(request)
+        ).andExpect(status().isNotFound());
     }
-
 
     @Test
     void developerCannotManageProjectMembers() throws Exception {
-
-        String developerToken =
-                jwtService.generateToken(DEVELOPER_EMAIL);
+        String developerToken = jwtService.generateToken(DEVELOPER_EMAIL);
 
         mockMvc.perform(
-                        get("/api/projects/1/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + developerToken
-                                )
-                )
-                .andExpect(status().isForbidden());
+                get("/api/projects/1/members")
+                        .header("Authorization", "Bearer " + developerToken)
+        ).andExpect(status().isForbidden());
     }
-
 
     @Test
     void testerCannotManageProjectMembers() throws Exception {
-
-        String testerToken =
-                jwtService.generateToken(TESTER_EMAIL);
+        String testerToken = jwtService.generateToken(TESTER_EMAIL);
 
         mockMvc.perform(
-                        get("/api/projects/1/members")
-                                .header(
-                                        "Authorization",
-                                        "Bearer " + testerToken
-                                )
-                )
-                .andExpect(status().isForbidden());
+                get("/api/projects/1/members")
+                        .header("Authorization", "Bearer " + testerToken)
+        ).andExpect(status().isForbidden());
     }
 }

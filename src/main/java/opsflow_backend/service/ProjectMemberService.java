@@ -1,3 +1,4 @@
+
 package opsflow_backend.service;
 
 import opsflow_backend.dto.AddProjectMemberRequest;
@@ -44,10 +45,8 @@ public class ProjectMemberService {
             return Optional.empty();
         }
 
-        if (projectMemberRepository
-                .existsByProjectIdAndUserId(
-                        projectId,
-                        request.getUserId())) {
+        if (projectMemberRepository.existsByProjectIdAndUserId(
+                projectId, request.getUserId())) {
 
             throw new DuplicateProjectMemberException(
                     "User is already a member of this project"
@@ -60,25 +59,24 @@ public class ProjectMemberService {
         member.setUser(user.get());
         member.setRole(request.getRole());
 
-        return Optional.of(
-                projectMemberRepository.save(member)
-        );
+        return Optional.of(projectMemberRepository.save(member));
     }
 
-    public List<ProjectMember> getProjectMembers(
-            Long projectId) {
-
-        return projectMemberRepository
-                .findByProjectId(projectId);
+    public List<ProjectMember> getProjectMembers(Long projectId) {
+        return projectMemberRepository.findByProjectId(projectId);
     }
 
-    public boolean removeMember(Long memberId) {
+    public boolean removeMember(Long projectId, Long memberId) {
 
-        if (!projectMemberRepository.existsById(memberId)) {
+        Optional<ProjectMember> member =
+                projectMemberRepository.findById(memberId);
+
+        if (member.isEmpty()
+                || !member.get().getProject().getId().equals(projectId)) {
             return false;
         }
 
-        projectMemberRepository.deleteById(memberId);
+        projectMemberRepository.delete(member.get());
         return true;
     }
 }

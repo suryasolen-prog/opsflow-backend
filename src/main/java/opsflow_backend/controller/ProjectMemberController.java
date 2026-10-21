@@ -1,3 +1,4 @@
+
 package opsflow_backend.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -21,7 +22,6 @@ public class ProjectMemberController {
 
     public ProjectMemberController(
             ProjectMemberService projectMemberService) {
-
         this.projectMemberService = projectMemberService;
     }
 
@@ -43,8 +43,7 @@ public class ProjectMemberController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectMemberResponse>>
-    getProjectMembers(
+    public ResponseEntity<List<ProjectMemberResponse>> getProjectMembers(
             @PathVariable Long projectId) {
 
         List<ProjectMemberResponse> members =
@@ -63,7 +62,7 @@ public class ProjectMemberController {
             @PathVariable Long memberId) {
 
         boolean removed =
-                projectMemberService.removeMember(memberId);
+                projectMemberService.removeMember(projectId, memberId);
 
         if (!removed) {
             return ResponseEntity.notFound().build();
@@ -72,9 +71,7 @@ public class ProjectMemberController {
         return ResponseEntity.noContent().build();
     }
 
-    private ProjectMemberResponse toResponse(
-            ProjectMember member) {
-
+    private ProjectMemberResponse toResponse(ProjectMember member) {
         return new ProjectMemberResponse(
                 member.getId(),
                 member.getProject().getId(),
