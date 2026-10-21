@@ -1,3 +1,4 @@
+
 package opsflow_backend.security;
 
 import jakarta.servlet.FilterChain;
@@ -42,12 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        logger.debug(
-                "JWT request: {} {}",
-                request.getMethod(),
-                request.getRequestURI()
-        );
-
+        // Do not log request URIs, which may contain sensitive data.
         String authorizationHeader =
                 request.getHeader("Authorization");
 
@@ -100,16 +96,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .setAuthentication(authentication);
 
                 logger.debug(
-        "JWT authentication successful with role: {}",
-        role
-);
+                        "JWT authentication successful with role: {}",
+                        role
+                );
             }
 
         } catch (Exception e) {
 
+            // Never expose exception messages or token details in logs.
             logger.debug(
-                    "JWT authentication failed: {}",
-                    e.getMessage()
+                    "JWT authentication failed; request remains unauthenticated"
             );
         }
 
