@@ -381,6 +381,32 @@ class OpsflowBackendApplicationTests {
 				)
 				.andExpect(status().isForbidden());
 	}
+	@Test
+	void developerCannotCreateAdminUser() throws Exception {
+
+		String developerToken =
+				jwtService.generateToken(DEVELOPER_EMAIL);
+
+		String createRequest = """
+                {
+                    "name": "Blocked Admin",
+                    "email": "blocked-admin-%s@opsflow.com",
+                    "password": "TestPassword123!",
+                    "role": "ADMIN"
+                }
+                """.formatted(System.currentTimeMillis());
+
+		mockMvc.perform(
+						post("/api/users")
+								.header(
+										"Authorization",
+										"Bearer " + developerToken
+								)
+								.contentType(APPLICATION_JSON)
+								.content(createRequest)
+				)
+				.andExpect(status().isForbidden());
+	}
 
 
 	@Test
