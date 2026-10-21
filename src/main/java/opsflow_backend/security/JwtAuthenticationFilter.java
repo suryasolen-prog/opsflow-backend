@@ -100,10 +100,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .setAuthentication(authentication);
 
                 logger.debug(
-                        "JWT authentication successful for user: {} with role: {}",
-                        email,
-                        role
-                );
+        "JWT authentication successful with role: {}",
+        role
+);
             }
 
         } catch (Exception e) {
