@@ -1,6 +1,8 @@
+
 package opsflow_backend.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +28,6 @@ public class JwtService {
     }
 
     public String generateToken(String email) {
-
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
@@ -43,14 +44,14 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+
         try {
             extractAllClaims(token);
             return true;
-        } catch (Exception e) {
-            System.out.println("JWT VALIDATION ERROR: "
-                    + e.getClass().getName()
-                    + " - "
-                    + e.getMessage());
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
