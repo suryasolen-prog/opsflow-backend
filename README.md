@@ -4,263 +4,169 @@ OpsFlow is a Spring Boot backend application for managing users, projects, proje
 
 ## Technology Stack
 
-* Java 21
-* Spring Boot 4.1.1
-* Spring Web MVC
-* Spring Data JPA
-* Spring Security
-* PostgreSQL 18
-* JWT authentication using JJWT
-* BCrypt password hashing
-* Bean Validation
-* SpringDoc OpenAPI / Swagger UI
-* Maven
-* JUnit 5 / Spring Boot Test
+- Java 21
+- Spring Boot
+- Spring Web MVC
+- Spring Data JPA
+- Spring Security
+- PostgreSQL
+- JJWT for JWT authentication
+- BCrypt password hashing
+- Bean Validation
+- SpringDoc OpenAPI / Swagger UI
+- Maven
+- JUnit 5 and Spring Boot Test
 
-## Main Features
+## Features
 
-* User management
-* JWT-based authentication
-* Role-based access control
-* Project management
-* Project member management
-* Task management
-* Request validation
-* Global exception handling
-* Swagger/OpenAPI documentation
-* Automated integration tests
+- User management
+- JWT-based authentication
+- Role-based access control
+- Project and project-member management
+- Task management
+- Request validation
+- Global exception handling
+- Swagger/OpenAPI documentation
+- Automated tests
 
-## User Roles
+## User Roles and Access
 
-OpsFlow currently supports four roles:
+OpsFlow supports four roles: `ADMIN`, `MANAGER`, `DEVELOPER`, and `TESTER`.
 
-* ADMIN
-* MANAGER
-* DEVELOPER
-* TESTER
-
-### Current Access Rules
-
-| Role      | Projects | Project Members | Tasks   | Users   |
-| --------- | -------- | --------------- | ------- | ------- |
-| ADMIN     | Allowed  | Allowed         | Allowed | Allowed |
-| MANAGER   | Allowed  | Allowed         | Allowed | Denied  |
-| DEVELOPER | Denied   | Denied          | Denied  | Denied  |
-| TESTER    | Denied   | Denied          | Denied  | Denied  |
+| Role | Projects | Project Members | Tasks | Users |
+|---|---|---|---|---|
+| ADMIN | Allowed | Allowed | Allowed | Allowed |
+| MANAGER | Allowed | Allowed | Allowed | Denied |
+| DEVELOPER | Denied | Denied | Denied | Denied |
+| TESTER | Denied | Denied | Denied | Denied |
 
 ## Authentication
 
-Authentication is implemented using JSON Web Tokens (JWT).
-
-The login endpoint is:
+Login endpoint:
 
 `POST /api/auth/login`
 
-A successful login returns a JWT token.
-
-Protected endpoints require:
+A successful login returns a JWT. Include it in requests to protected endpoints:
 
 `Authorization: Bearer <JWT>`
 
-Passwords are stored using BCrypt hashing.
+Passwords are hashed using BCrypt.
 
-## API Modules
+## API Endpoints
 
 ### Authentication
-
-* `POST /api/auth/login`
+- `POST /api/auth/login`
 
 ### Users
-
-* `POST /api/users`
-* `GET /api/users`
-* `GET /api/users/{id}`
-* `GET /api/users/email/{email}`
-* `DELETE /api/users/{id}`
-* `PUT /api/users/{id}/password`
-* `GET /api/users/admin-test`
+- `POST /api/users`
+- `GET /api/users`
+- `GET /api/users/{id}`
+- `GET /api/users/email/{email}`
+- `DELETE /api/users/{id}`
+- `PUT /api/users/{id}/password`
+- `GET /api/users/admin-test`
 
 ### Projects
-
-* `POST /api/projects`
-* `GET /api/projects`
-* `GET /api/projects/{id}`
-* `PUT /api/projects/{id}`
-* `DELETE /api/projects/{id}`
+- `POST /api/projects`
+- `GET /api/projects`
+- `GET /api/projects/{id}`
+- `PUT /api/projects/{id}`
+- `DELETE /api/projects/{id}`
 
 ### Project Members
-
-* `POST /api/projects/{projectId}/members`
-* `GET /api/projects/{projectId}/members`
-* `DELETE /api/projects/{projectId}/members/{memberId}`
+- `POST /api/projects/{projectId}/members`
+- `GET /api/projects/{projectId}/members`
+- `DELETE /api/projects/{projectId}/members/{memberId}`
 
 ### Tasks
+- `POST /api/projects/{projectId}/tasks`
+- `GET /api/projects/{projectId}/tasks`
+- `GET /api/tasks/{id}`
+- `PUT /api/tasks/{id}`
+- `DELETE /api/tasks/{id}`
 
-* `POST /api/projects/{projectId}/tasks`
-* `GET /api/projects/{projectId}/tasks`
-* `GET /api/tasks/{id}`
-* `PUT /api/tasks/{id}`
-* `DELETE /api/tasks/{id}`
+## Configuration
 
-## Database
-
-OpsFlow uses PostgreSQL.
-
-Database configuration is provided through environment variables:
-
-* `DB_USERNAME`
-* `DB_PASSWORD`
-* `JWT_SECRET`
-
-Sensitive credentials should not be committed to source control.
-
-The application uses Hibernate/JPA with:
-
-`spring.jpa.hibernate.ddl-auto=update`
-
-## Running the Application
-
-### 1. Configure environment variables
-
-Set:
-
-* `DB_USERNAME`
-* `DB_PASSWORD`
-* `JWT_SECRET`
-
-### Environment Variable Example
-
-Copy `.env.example` as a reference and provide your own values for:
+Configure these environment variables before running the application:
 
 - `DB_USERNAME`
 - `DB_PASSWORD`
 - `JWT_SECRET`
 
-Never commit real credentials or JWT secrets.
+Use `.env.example` as a reference. Supply your own credentials and a strong JWT secret. Never commit real credentials, secrets, or tokens.
 
-### Maven Commands
+The application uses PostgreSQL and Hibernate/JPA. The configured schema strategy is `spring.jpa.hibernate.ddl-auto=update`.
 
-Compile the application:
+## Running the Application
 
-```text
+From the project root, compile the application:
+
+```powershell
 .\mvnw.cmd clean compile
+```
 
+Run the tests and verification checks:
 
----
+```powershell
+.\mvnw.cmd clean verify
+```
 
-### 9. Add the application architecture section
+Start the application using your IDE's run configuration for `OpsflowBackendApplication`, or use the project's Maven configuration.
 
-Add:
-
-```markdown
-## Architecture
-
-OpsFlow follows a layered Spring Boot architecture:
-
-- Controllers handle HTTP requests and responses.
-- Services contain business logic.
-- Repositories provide database access.
-- Entities represent database tables.
-- DTOs define API request and response models.
-- Security handles JWT authentication and RBAC.
-- Exception handlers provide consistent API error responses.
-
-## Common HTTP Responses
-
-- `200 OK` — successful read/update operation
-- `201 Created` — successful creation
-- `204 No Content` — successful deletion
-- `400 Bad Request` — validation failure
-- `401 Unauthorized` — missing or invalid authentication
-- `403 Forbidden` — authenticated user lacks permission
-- `404 Not Found` — requested resource does not exist
-- `409 Conflict` — duplicate resource
-
-### 2. Start the application
-
-Run:
-
-`OpsflowBackendApplication`
-
-The backend runs on:
+The default local application URL is:
 
 `http://localhost:8080`
 
-## Swagger UI
+Ensure the required environment variables and PostgreSQL database are configured first.
 
-Swagger UI is available at:
+## API Documentation
+
+Swagger UI:
 
 `http://localhost:8080/swagger-ui/index.html`
 
-OpenAPI documentation is available at:
+OpenAPI specification:
 
 `http://localhost:8080/v3/api-docs`
 
 ## Health Check
 
-The application exposes:
+Health endpoint:
 
 `GET /actuator/health`
 
-## Project Structure
+## Architecture
 
-```text
-opsflow-backend
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── opsflow_backend
-│   │   │       ├── auth
-│   │   │       ├── config
-│   │   │       ├── controller
-│   │   │       ├── dto
-│   │   │       ├── entity
-│   │   │       ├── exception
-│   │   │       ├── repository
-│   │   │       ├── security
-│   │   │       └── service
-│   │   └── resources
-│   │       └── application.properties
-│   └── test
-│       └── java
-│           └── opsflow_backend
-├── pom.xml
-└── README.md
-```
+The application uses a layered Spring Boot structure:
+
+- Controllers handle HTTP requests and responses.
+- Services implement business logic.
+- Repositories provide database access.
+- Entities represent persisted data.
+- DTOs define API request and response models.
+- Security components handle JWT authentication and authorization.
+- Exception handlers provide consistent error responses.
 
 ## Testing
 
-The complete automated test suite currently passes successfully.
+Run the automated test suite with:
 
-* Tests: 52
-* Failures: 0
-* Errors: 0
-* Exit code: 0
+```powershell
+.\mvnw.cmd clean verify
+```
 
-The automated tests cover authentication/security behavior, users, projects, project members, tasks, validation, and RBAC behavior.
+The last recorded successful verification completed with **54 tests, 0 failures, and 0 errors**. Rerun the command before relying on this count for a new release.
 
-Temporary automated test data uses `AUTOTEST-*` naming where applicable.
-
-## Current Verification
-
-The application has also been verified through Swagger UI.
-
-Example:
-
-`GET /api/projects/1`
-
-returns HTTP `200 OK`.
+Tests cover authentication and security, user management, projects, project members, tasks, validation, and access control.
 
 ## Security Notes
 
-* Do not store database passwords in source files.
-* Do not store JWT secrets in source files.
-* Do not commit real JWT tokens.
-* JWT tokens used during testing should be treated as temporary credentials.
-* Rotate the JWT secret if a real secret has been exposed.
+- Keep database credentials and JWT secrets out of source control.
+- Use strong, environment-specific secrets.
+- Do not commit real JWT tokens.
+- Treat test tokens as temporary credentials.
+- Rotate any secret that may have been exposed.
 
-## Status
+## Project Status
 
-OpsFlow backend implementation and automated testing are complete.
-
-The project is ready for final documentation, cleanup, and packaging.
+The security fixes SEC-01 through SEC-05 have been merged into `main`. Run the verification suite before preparing a release.
