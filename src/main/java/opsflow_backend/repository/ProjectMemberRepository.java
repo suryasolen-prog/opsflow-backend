@@ -18,6 +18,9 @@ public interface ProjectMemberRepository
             Long projectId,
             Long userId);
 
+    @EntityGraph(attributePaths = {"user", "project"})
+    List<ProjectMember> findByUserIdAndRole(Long userId, ProjectMember.MemberRole role);
+
     boolean existsByProjectIdAndUserId(
             Long projectId,
             Long userId);

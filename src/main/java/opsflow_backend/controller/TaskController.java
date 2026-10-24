@@ -6,9 +6,11 @@ import opsflow_backend.dto.CreateTaskRequest;
 import opsflow_backend.dto.TaskResponse;
 import opsflow_backend.dto.UpdateTaskRequest;
 import opsflow_backend.entity.Task;
+import opsflow_backend.service.ProjectAuthorizationService;
 import opsflow_backend.service.TaskService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,75 +21,95 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+    private final ProjectAuthorizationService authorizationService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(
+            TaskService taskService,
+            ProjectAuthorizationService authorizationService) {
         this.taskService = taskService;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<TaskResponse> createTask(
             @PathVariable Long projectId,
-            @Valid @RequestBody CreateTaskRequest request
-    ) {
-        Task task = taskService.createTask(projectId, request);
+            @Valid @RequestBody CreateTaskRequest request,
+            Authentication authentication) {
+        if (!authorizationService.canAccessProject(projectId, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(toTaskResponse(task));
+        Task task = taskService.createTask(projectId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toTaskResponse(task));
     }
 
     @GetMapping("/projects/{projectId}/tasks")
     public ResponseEntity<List<TaskResponse>> getTasks(
-            @PathVariable Long projectId
-    ) {
-        List<TaskResponse> tasks = taskService
-                .getTasksByProject(projectId)
-                .stream()
-                .map(this::toTaskResponse)
-                .toList();
+            @PathVariable Long projectId,
+            Authentication authentication) {
+        if (!authorizationService.canAccessProject(projectId, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
+        List<TaskResponse> tasks = taskService.getTasksByProject(projectId)
+                .stream().map(this::toTaskResponse).toList();
         return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/tasks/{id}")
     public ResponseEntity<TaskResponse> getTask(
-            @PathVariable Long id
-    ) {
-        return taskService.getTaskById(id)
-                .map(this::toTaskResponse)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            @PathVariable Long id,
+            Authentication authentication) {
+        Task task = taskService.getTaskById(id).orElse(null);
+        if (task == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!authorizationService.canAccessTask(id, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(toTaskResponse(task));
     }
 
     @PutMapping("/tasks/{id}")
     public ResponseEntity<TaskResponse> updateTask(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateTaskRequest request
-    ) {
+            @Valid @RequestBody UpdateTaskRequest request,
+            Authentication authentication) {
         if (taskService.getTaskById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Task updatedTask = taskService.updateTask(id, request);
+        if (!authorizationService.canAccessTask(id, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
+        Task updatedTask = taskService.updateTask(id, request);
         return ResponseEntity.ok(toTaskResponse(updatedTask));
     }
 
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<Void> deleteTask(
-            @PathVariable Long id
-    ) {
-        boolean deleted = taskService.deleteTask(id);
-
-        if (!deleted) {
+            @PathVariable Long id,
+            Authentication authentication) {
+        if (taskService.getTaskById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
+        if (!authorizationService.canAccessTask(id, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        boolean deleted = taskService.deleteTask(id);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.noContent().build();
     }
 
+    @SuppressWarnings("unused")
     private TaskResponse toTaskResponse(Task task) {
-
         Long assigneeId = null;
         String assigneeName = null;
         String assigneeEmail = null;
