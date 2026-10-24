@@ -1,9 +1,12 @@
+
 package opsflow_backend;
 
 import opsflow_backend.entity.Project;
 import opsflow_backend.entity.ProjectMember;
+import opsflow_backend.entity.User;
 import opsflow_backend.repository.ProjectMemberRepository;
 import opsflow_backend.repository.ProjectRepository;
+import opsflow_backend.repository.UserRepository;
 import opsflow_backend.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +38,20 @@ class ProjectMemberControllerTests {
     @Autowired
     private ProjectMemberRepository projectMemberRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private static final String ADMIN_EMAIL = "rbacadmin2@opsflow.com";
     private static final String DEVELOPER_EMAIL = "rbacdeveloper@opsflow.com";
     private static final String TESTER_EMAIL = "rbactester@opsflow.com";
+    private static final String CI_TEST_USER_EMAIL = "ci-test-user-99@opsflow.com";
+
+    private Long userId(String email) {
+        return userRepository.findByEmail(email)
+                .map(User::getId)
+                .orElseThrow(() ->
+                        new IllegalStateException("Test user not found: " + email));
+    }
 
     @Test
     void adminCanGetProjectMembers() throws Exception {
@@ -52,13 +66,14 @@ class ProjectMemberControllerTests {
     @Test
     void adminCanAddProjectMember() throws Exception {
         String adminToken = jwtService.generateToken(ADMIN_EMAIL);
+        Long testUserId = userId(CI_TEST_USER_EMAIL);
 
         String request = """
                 {
-                    "userId": 99,
+                    "userId": %d,
                     "role": "TESTER"
                 }
-                """;
+                """.formatted(testUserId);
 
         mockMvc.perform(
                         post("/api/projects/1/members")
@@ -68,11 +83,11 @@ class ProjectMemberControllerTests {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.projectId").value(1))
-                .andExpect(jsonPath("$.userId").value(99))
+                .andExpect(jsonPath("$.userId").value(testUserId.intValue()))
                 .andExpect(jsonPath("$.role").value("TESTER"));
 
         ProjectMember member = projectMemberRepository
-                .findByProjectIdAndUserId(1L, 99L)
+                .findByProjectIdAndUserId(1L, testUserId)
                 .orElseThrow();
 
         projectMemberRepository.deleteById(member.getId());
@@ -81,6 +96,7 @@ class ProjectMemberControllerTests {
     @Test
     void cannotDeleteMembershipThroughDifferentProjectUrl() throws Exception {
         String adminToken = jwtService.generateToken(ADMIN_EMAIL);
+        Long testUserId = userId(CI_TEST_USER_EMAIL);
 
         Project otherProject = new Project();
         otherProject.setName("SEC-01 regression project");
@@ -90,10 +106,10 @@ class ProjectMemberControllerTests {
         try {
             String request = """
                     {
-                        "userId": 99,
+                        "userId": %d,
                         "role": "TESTER"
                     }
-                    """;
+                    """.formatted(testUserId);
 
             mockMvc.perform(
                     post("/api/projects/" + otherProjectId + "/members")
@@ -103,7 +119,7 @@ class ProjectMemberControllerTests {
             ).andExpect(status().isCreated());
 
             ProjectMember member = projectMemberRepository
-                    .findByProjectIdAndUserId(otherProjectId, 99L)
+                    .findByProjectIdAndUserId(otherProjectId, testUserId)
                     .orElseThrow();
 
             mockMvc.perform(
@@ -116,7 +132,7 @@ class ProjectMemberControllerTests {
                     "Membership must remain when the URL project ID does not match"
             );
         } finally {
-            projectMemberRepository.findByProjectIdAndUserId(otherProjectId, 99L)
+            projectMemberRepository.findByProjectIdAndUserId(otherProjectId, testUserId)
                     .ifPresent(projectMemberRepository::delete);
 
             projectRepository.deleteById(otherProjectId);
@@ -126,13 +142,14 @@ class ProjectMemberControllerTests {
     @Test
     void duplicateProjectMemberReturnsConflict() throws Exception {
         String adminToken = jwtService.generateToken(ADMIN_EMAIL);
+        Long developerId = userId(DEVELOPER_EMAIL);
 
         String request = """
                 {
-                    "userId": 21,
+                    "userId": %d,
                     "role": "DEVELOPER"
                 }
-                """;
+                """.formatted(developerId);
 
         mockMvc.perform(
                         post("/api/projects/1/members")
@@ -190,13 +207,14 @@ class ProjectMemberControllerTests {
     @Test
     void nonexistentProjectReturnsNotFound() throws Exception {
         String adminToken = jwtService.generateToken(ADMIN_EMAIL);
+        Long developerId = userId(DEVELOPER_EMAIL);
 
         String request = """
                 {
-                    "userId": 21,
+                    "userId": %d,
                     "role": "DEVELOPER"
                 }
-                """;
+                """.formatted(developerId);
 
         mockMvc.perform(
                 post("/api/projects/999999999/members")
