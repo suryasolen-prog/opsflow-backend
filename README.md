@@ -10,6 +10,7 @@ OpsFlow is a Spring Boot backend application for managing users, projects, proje
 - Spring Data JPA
 - Spring Security
 - PostgreSQL
+- Flyway database migrations
 - JJWT for JWT authentication
 - BCrypt password hashing
 - Bean Validation
@@ -28,6 +29,7 @@ OpsFlow is a Spring Boot backend application for managing users, projects, proje
 - Global exception handling
 - Swagger/OpenAPI documentation
 - Automated tests
+- Versioned database schema migrations using Flyway
 
 ## User Roles and Access
 
@@ -95,7 +97,15 @@ Configure these environment variables before running the application:
 
 Use `.env.example` as a reference. Supply your own credentials and a strong JWT secret. Never commit real credentials, secrets, or tokens.
 
-The application uses PostgreSQL and Hibernate/JPA. The configured schema strategy is `spring.jpa.hibernate.ddl-auto=update`.
+### Database Schema Management
+
+The application uses PostgreSQL, Hibernate/JPA, and Flyway. Flyway manages database schema migrations, and Hibernate validates the schema at startup using `spring.jpa.hibernate.ddl-auto=validate`. Schema changes should be introduced through versioned Flyway migration scripts.
+
+Flyway migration scripts are located in `src/main/resources/db/migration/`. The initial migration is `V1__initial_schema.sql`.
+
+The current Flyway configuration includes `spring.flyway.baseline-on-migrate=true` and `spring.flyway.baseline-version=1`.
+
+**Important:** For an existing non-empty database without Flyway history, baseline behavior may cause Flyway to skip the V1 migration. Verify the schema and migration history, and back up important data before making migration-related changes.
 
 ## Running the Application
 
