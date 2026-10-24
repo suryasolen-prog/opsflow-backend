@@ -6,9 +6,11 @@ import opsflow_backend.dto.CreateProjectRequest;
 import opsflow_backend.dto.ProjectResponse;
 import opsflow_backend.dto.UpdateProjectRequest;
 import opsflow_backend.entity.Project;
+import opsflow_backend.service.ProjectAuthorizationService;
 import opsflow_backend.service.ProjectService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,39 +21,35 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final ProjectAuthorizationService authorizationService;
 
-    public ProjectController(ProjectService projectService) {
+    public ProjectController(
+            ProjectService projectService,
+            ProjectAuthorizationService authorizationService) {
         this.projectService = projectService;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(
             @Valid @RequestBody CreateProjectRequest request) {
-
-        Project project =
-                projectService.createProject(request);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(toProjectResponse(project));
+        Project project = projectService.createProject(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toProjectResponse(project));
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectResponse>> getAllProjects() {
-
-        List<ProjectResponse> projects =
-                projectService.getAllProjects()
-                        .stream()
-                        .map(this::toProjectResponse)
-                        .toList();
-
+    public ResponseEntity<List<ProjectResponse>> getAllProjects(Authentication authentication) {
+        List<ProjectResponse> projects = authorizationService.getAccessibleProjects(authentication)
+                .stream().map(this::toProjectResponse).toList();
         return ResponseEntity.ok(projects);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getProjectById(
-            @PathVariable Long id) {
-
+            @PathVariable Long id, Authentication authentication) {
+        if (!authorizationService.canAccessProject(id, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return projectService.getProjectById(id)
                 .map(this::toProjectResponse)
                 .map(ResponseEntity::ok)
@@ -61,10 +59,12 @@ public class ProjectController {
     @PutMapping("/{id}")
     public ResponseEntity<ProjectResponse> updateProject(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateProjectRequest request) {
-
-        return projectService
-                .updateProject(id, request)
+            @Valid @RequestBody UpdateProjectRequest request,
+            Authentication authentication) {
+        if (!authorizationService.canAccessProject(id, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return projectService.updateProject(id, request)
                 .map(this::toProjectResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -72,20 +72,18 @@ public class ProjectController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(
-            @PathVariable Long id) {
-
-        boolean deleted =
-                projectService.deleteProject(id);
-
+            @PathVariable Long id, Authentication authentication) {
+        if (!authorizationService.canAccessProject(id, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        boolean deleted = projectService.deleteProject(id);
         if (!deleted) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.noContent().build();
     }
 
     private ProjectResponse toProjectResponse(Project project) {
-
         return new ProjectResponse(
                 project.getId(),
                 project.getName(),
