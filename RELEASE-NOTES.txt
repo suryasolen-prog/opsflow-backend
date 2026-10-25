@@ -33,7 +33,7 @@ Implementation:
 * Swagger/OpenAPI documentation
 
 Automated tests:
-52 tests passed
+54 tests passed
 0 failures
 0 errors
 
