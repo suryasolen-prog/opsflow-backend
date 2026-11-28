@@ -24,4 +24,6 @@ public interface ProjectMemberRepository
     boolean existsByProjectIdAndUserId(
             Long projectId,
             Long userId);
+
+    boolean existsByProjectId(Long projectId);
 }
