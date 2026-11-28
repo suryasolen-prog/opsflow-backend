@@ -10,10 +10,12 @@ import opsflow_backend.service.ProjectAuthorizationService;
 import opsflow_backend.service.ProjectService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -42,6 +44,12 @@ public class ProjectController {
         List<ProjectResponse> projects = authorizationService.getAccessibleProjects(authentication)
                 .stream().map(this::toProjectResponse).toList();
         return ResponseEntity.ok(projects);
+    }
+
+    @PostMapping("/admin/cleanup-opsflow-duplicates")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> cleanupOpsFlowDuplicates() {
+        return ResponseEntity.ok(projectService.cleanupOpsFlowDuplicateProjects());
     }
 
     @GetMapping("/{id}")
